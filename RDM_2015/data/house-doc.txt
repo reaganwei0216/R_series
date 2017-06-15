@@ -1,0 +1,35 @@
+
+變數名稱：
+
+1.  price (總價：萬)
+2.  unit_price (每坪單價：萬)
+3.  measure (坪數)
+4.  parking (車位)
+5.  parking_price (車位價格)
+6.  floor  (所在樓層)
+7.  floor2 (所在樓層的平方)
+8.  nfloor (建築物總樓層數目)
+9.  area   (行政區: A1, A2, ..., A12 )
+10. room  (房間數)
+11. hall (客廳數)
+12. bath (浴廁數)
+13. house_age (屋齡)
+14. date (銷售時間: 民國年份+月份)
+15. house_type  (建築型態)
+16. season (銷售季節)
+
+變數 area: A1~A12 行政區
+
+A1    大安區 
+A2    中正區 
+A3    中山區 
+A4    萬華區 
+A5    北投區 
+A6    信義區 
+A7    文山區 
+A8    士林區 
+A9    南港區 
+A10   大同區 
+A11   內湖區 
+A12   松山區 
+

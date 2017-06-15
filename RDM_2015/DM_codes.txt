@@ -1,0 +1,583 @@
+########################################################################
+# Simple R Program
+########################################################################
+baby = read.csv("d:/mydir/babies.csv")
+baby = na.exclude(baby)	# 刪除帶有遺失值的記錄
+head(baby)
+
+mean(baby$bwt )		# sample mean
+sd(baby$age)			# sample standard deviation
+baby$smoke = as.factor(baby$smoke)    # 轉成分類變數
+
+# 迴歸分析   -----
+result = lm(bwt ~ age + height + weight + smoke, data=baby)
+
+########################################################################
+# 向量之間的加減乘除運算 -----
+########################################################################
+x = c(1,2,3,4,5)
+y = c(10,20,30,40,50)
+x + y
+#[1] 11 22 33 44 55
+x - y
+#[1]  -9 -18 -27 -36 -45
+x * y
+#[1]  10  40  90 160 250
+y ^ x
+#[1]        10       400     27000   2560000 312500000
+x + 100 
+#[1] 101 102 103 104 105
+
+########################################################################
+# 利用向量、矩陣、與陣列指標作快速資料篩選 -----
+########################################################################
+x = c(1,2,3,4,5)
+y = c(10,20,30,40,50)
+x >= 3
+#[1] FALSE FALSE  TRUE  TRUE  TRUE
+
+( x.index = x >= 3 )
+#[1] FALSE FALSE  TRUE  TRUE  TRUE
+
+x[x >= 3]     # 或 x[ x.index ]
+#[1] 3 4 5
+
+x[c(F,F,T,T,T)]
+#[1] 3 4 5
+
+x[c(3,4,5)]
+#[1] 3 4 5
+
+x[y >= 20]
+#[1] 2 3 4 5
+
+z = c("boy","girl","boy","boy","girl")
+y[z == "boy"]
+#[1] 10 30 40
+
+########################################################################
+# LIST (串列) 變數：多用於儲存計算後的 Output 結果 -----
+########################################################################
+
+x = rnorm(20); y = rnorm(20)   # 隨機產生兩組 N(0,1) 亂數
+lm.result = lm(y ~ x)                 # 簡單迴歸分析, output 存到 lm.result
+lm.result
+
+#Call:
+#lm(formula = y ~ x)
+#Coefficients:
+#(Intercept)            x  
+#     0.2781      -0.2354  
+
+names(lm.result) # 迴歸分析的output 含有以下這些「部分資訊」
+# [1] "coefficients"    "residuals"     "effects"        "rank"  ……..       
+
+lm.result$coefficients
+#(Intercept)           x 
+#  0.2781229  -0.2353573 
+
+lm.result$coefficients[2]
+#x 
+#-0.2353573 
+
+########################################################################
+# Factor (因子) 變數：用於處理分類變數，通常用於迴歸分析與 ANOVA -----
+########################################################################
+
+gender = c("男","男","女","女","男","女")
+gender2 = as.factor(gender)
+gender2
+#[1] 男 男 女 女 男 女
+#Levels: 女 男
+
+levels(gender2)
+#[1] "女" "男"
+
+########################################################################
+# Function 中的 … 參數 -----
+########################################################################
+f1 = function(x,f0,…) {
+   result = f0(x,…)
+   return(result)
+}
+
+y = rnorm(100)
+f1(y,mean,trim=0.05,na.rm=T)
+
+# 此時 f0(x,...) = mean(x,trim=0.05,na.rm=T)
+#[1] -0.01223996
+
+########################################################################
+# Function 中需使用適當的 cat 機制 -----
+########################################################################
+f2 = function(x) 
+{
+   mean(x)
+   var(x)  
+}
+
+f2(y)
+#[1] 0.9221541
+
+f2 = function(x)
+{
+   cat("mean of X = ",mean(x),"\n")
+   var(x)
+}
+
+f2(y)
+#mean of X =  -0.01626653 
+#[1] 0.9221541
+
+########################################################################
+# 將全部資料分成 training sample (訓練樣本) 跟 test sample (測試樣本)：-----
+# 以 iris 資料檔為例 
+########################################################################
+
+
+p = 0.9  # 訓練樣本佔全部觀察值的比例
+
+index = sample(2, nrow(iris), replace = TRUE, prob=c(p,1-p))
+train = iris[index == 1,]
+test = iris[index == 2,]
+
+Xall = iris[,- which(names(iris)=="Species") ]
+# 或 Xall = iris[ , - Y變數column數字指標 ]
+# 例如 Xall = iris[, - 5]
+
+Xtrain = train[,- which(names(iris)=="Species") ]
+# 或 Xtrain = train[, - Y變數column數字指標 ]
+# 例如 Xtest = train[, - 5]
+
+Ytrain = as.factor(train$Species)
+
+Xtest = test[,- which(names(iris)=="Y") ]
+# 或 Xtest = test[, - Y變數column數字指標 ] ,
+# 例如 Xtest = test[, - 5]
+
+Ytest = as.factor(test$Species)
+
+###################################################################
+# Splitdata( ) 函數 -----
+###################################################################
+Splitdata = function(data,p=0.9)
+{	
+	index = sample(2, nrow(data), replace = TRUE, prob=c(p,1-p))
+	train = data[index == 1,]
+	test = data[index == 2,]
+	out = list(train=train,test=test)
+	return(out)
+}
+
+###################################################################
+# notY 函數: 擷取資料檔中不等於 Y 的所有其他變數 -----
+###################################################################
+notY = function(data,Y)
+{
+	# Example:   Xvars = notY(iris,"Species")
+	return(data[,-which(names(data) == Y)])
+}
+
+# Example: 將 iris data 分成訓練樣本跟測試樣本
+out = Splitdata(iris)
+Dtrain = out$train
+Dtest= out$test
+
+Ytrain = Dtrain[, "Species")]
+Ytest = Dtest[, "Species")]
+
+Xtrain = notY(Dtrain,"Species")
+Xtest = notY(Dtest,"Species")
+
+result = tree(Species~. ,data=Dtrain) ; plot(result)  ;  text(result)
+
+###################################################################
+# confmatrix 函數: 計算混淆矩陣 -----
+###################################################################
+confmatrix = function(Y,Ypred)
+{
+   t1 = table(Y,Ypredict=Ypred)  
+   print(t1)
+   p = sum(diag(t1))/sum(t1)*100
+   cat("\n\n預測正確率 = ",p,"% \n")
+}
+
+# Example: 
+library(tree)
+result = tree(Species ~ . , data=iris)
+p1 = predict(result,type="class")
+confmatrix(iris$Species, p1)
+
+###################################################################
+# confmatrix 函數: 計算混淆矩陣, 訓練樣本與測試樣本分開計算 -----
+###################################################################
+
+out = Splitdata(iris)
+Dtrain = out$train
+Dtest= out$test
+
+Ytrain = Dtrain[, "Species")]
+Ytest = Dtest[, "Species")]
+
+library(tree)
+
+# 訓練樣本 (training sample)
+result = tree(Species ~ . ,data=Dtrain)  # 注意 data=Dtrain
+result
+
+Ypred1 = predict(result,type="class")
+# 或Ypred1 = predict(result,newdata=Dtrain, type="class")
+confmatrix(Ytrain, Ypred1)
+
+# 測試樣本 (test sample)
+
+#注意，多了一個參數 newdata=Dtest
+Ypred2 = predict(result,newdata=Dtest,type="class") 
+confmatrix(Ytest, Ypred2)
+
+##################################################################
+#  CART：tree 套件 tree 函數 -----
+##################################################################
+
+library(tree)
+head(iris)
+result = tree(Species ~ .  , data=iris)
+result
+names(result)
+plot(result)
+text(result)
+Ypred = predict(result,type="class")
+
+confmatrix(iris$Species, Ypred)
+
+#( t = table(Y = iris$Species, Ypred) )   # 同時顯示 t 的內容
+#sum(diag(t))/sum(t)
+
+# library(rpart)
+# result2 = rpart(Species ~ . ,data=iris); plot(result2); text(result2)
+# Ypred2 = predict(result2,type="class")
+# confmatrix(iris$Species, Ypred2)
+# result2$variable.importance
+
+#-----------------------------------------------------------------
+#  CART 當做迴歸樹 -----
+#-----------------------------------------------------------------
+MAPE = function(Y, Ypred)
+{
+	# Example:  
+	# result = tree(Sepal.Length ~ . , data=iris)
+	# Ypred = predict(result,iris)
+	# MAPE(iris$Sepal.Length, Ypred)
+
+    return( mean(abs((Y - Ypred)/Y)))
+}
+
+head(iris)
+result = tree(Sepal.Length ~ .  , data=iris)
+result
+plot(result)
+text(result)
+
+p = predict(result)
+
+MAPE(iris$Sepal.Length, p)
+
+# MAPE = mean(abs((iris$Sepal.Length - p)/iris$Sepal.Length))
+# MAPE
+
+##################################################################
+#  CHAID -----
+##################################################################
+
+#data(iris)
+
+SepL = cut(iris$Sepal.Length,breaks = 10)
+SepW = cut(iris$Sepal.Width, breaks = 10)
+PetL = cut(iris$Petal.Length,breaks = 10)
+PetW = cut(iris$Petal.Width, breaks = 10)
+
+SepL = ordered(SepL)
+SepW = ordered(SepW)
+PetL = ordered(PetL)
+PetW = ordered(PetW)
+
+iris2=data.frame(SepL,SepW,PetL,PetW,Species=iris$Species)
+head(iris2)
+library(CHAID)
+result = chaid(Species ~ ., data = iris2)
+
+plot(result)
+print(result)
+
+Ypred = predict(result, newdata=iris2)
+# 或 Ypred = predict(result) 也可以
+
+Ypred
+
+confmatrix(iris2$Species, Ypred)
+
+#t = table(Y = iris2$Species, Ypred)
+#t
+#sum(diag(t))/sum(t)
+
+##################################################################
+#  C4.5 (J48)：Rweka 套件 J48 函數 -----
+##################################################################
+
+＃J48: 請先安裝  party 與 Rweka 套件
+install.packages("RWeka")
+install.packages("party")
+library(RWeka)
+result = J48(Species ~ . , data = iris)
+result
+summary(result)
+plot(result)
+Ypred = predict(result)
+confmatrix(iris$Species, Ypred)
+
+#( t = table(Y = iris$Species, Ypred ) )
+#sum(diag(t))/sum(t)
+
+##################################################################
+#  randomForest -----
+##################################################################
+
+library(randomForest)
+set.seed(71)
+result = randomForest(Species ~ . , data=iris , importance=TRUE, proximity=TRUE)
+print(result)
+
+round(importance(result), 2)
+names(result)
+t = result$confusion
+t
+
+sum(diag(t))/sum(t)
+
+# 用 randomForest 來作分群：只用最前面 4 個變數，不使用第 5 個變數 Species
+set.seed(17)
+result2 = randomForest(iris[, -5])
+result2
+
+MDSplot(result2, iris$Species, palette=rep(1, 3), pch=as.numeric(iris$Species))
+
+
+
+##################################################################
+#  nnet -----
+##################################################################
+
+library(nnet)
+result = nnet(Species ~ . , data = iris, size=3)
+
+Ypred = predict(result,iris[,1:4],type="class")
+
+confmatrix(iris$Species, Ypred)
+
+#( t = table(Y = iris$Species,Ypred ) )
+#cat('正確分類比例 = ',100*sum(diag(t))/sum(t),' % \n')
+
+##################################################################
+#  neuralnet -----
+##################################################################
+
+
+library(neuralnet)
+y=as.numeric(iris$Species)
+iris2=data.frame(iris[,1:4],y)
+result = neuralnet(y~Sepal.Length+Sepal.Width+Petal.Length+Petal.Width,hidden=c(3,2),data=iris2)
+result
+
+cf=compute(result,iris2[,1:4])
+Ypred = round(cf$net.result)
+
+confmatrix(iris2$y, Ypred)
+
+#(t=table(Y = iris2$y,Ypred))
+#cat("預測正確率 = ", sum(diag(t))/sum(t), "\n" )
+
+##################################################################
+#  SVM -----
+##################################################################
+out = Splitdata(iris)  ;  iris.Train = out$train  ; iris.Test = out$test
+
+library(e1071)
+
+result = svm(Species ~ . ,data=iris.Train)
+
+print(result)
+summary(result)
+
+Ypred = predict(result, iris.Train)
+confmatrix(iris.Train$Species,Ypred)
+
+Ypred = predict(result, iris.Test)
+confmatrix(iris.Test$Species,Ypred)
+
+##################################################################
+#  Naive Bayes -----
+##################################################################
+out = Splitdata(iris)  ;  iris.Train = out$train  ; iris.Test = out$test
+
+library(e1071)
+
+result = naiveBayes(Species ~ . ,data=iris.Train)
+print(result)
+summary(result)
+
+Ypred = predict(result, iris.Train)
+confmatrix(iris.Train$Species, Ypred)
+
+Ypred = predict(result, iris.Test)
+confmatrix(iris.Test$Species, Ypred)
+
+
+##################################################################
+# NumVars 函數：擷取資料檔的數值變數 ----- 
+##################################################################
+NumVars = function(data) {
+    nc = ncol(data)
+    keep = numeric(nc)
+    j = 0
+    for (i in 1:nc)  {
+	if (is.numeric(data[,i]))  {	
+ 	    j = j + 1
+	    keep[j] = i
+	}
+    }
+    return(as.matrix(data[,keep])  )
+}
+
+# Example
+iris2 = NumVars(iris)
+# 或
+# iris2 = iris[,sapply(iris,is.numeric)]
+
+head(iris2)
+
+# Sepal.Length Sepal.Width Petal.Length Petal.Width
+#[1,]          5.1         3.5          1.4         0.2
+#[2,]          4.9         3.0          1.4         0.2
+#.............................................................
+
+##################################################################
+# K-Means 集群分析 -----
+##################################################################
+
+library(mlbench)
+data(BostonHousing2)
+B2 = NumVars(BostonHousing2)
+B2 = na.exclude(B2)   # 去除遺失值
+ncluster = 5 
+result = kmeans(B2,centers=ncluster,nstart=10) 
+result
+result$cluster 	# 顯示各觀察值的分群
+table(result$cluster) 	# 計算各群的數目
+
+# iris data
+iris2 = NumVars(iris)
+ncluster = 3
+result = kmeans(iris2,centers=ncluster,nstart=10) 
+result
+result$cluster 	# 顯示各觀察值的分群
+table(result$cluster) 	# 計算各群的數目
+
+library(car)
+Y = as.numeric(iris$Species)
+Y2 = recode(Y,"1=2;2=1;3=3")
+confmatrix(Y2,result$cluster)
+
+#    Ypredict
+# Y    1  2  3
+#   1 48  0  2
+#   2  0 50  0
+#   3 14  0 36
+# 預測正確率 =  89.33333 % 
+
+
+##################################################################
+# 階層式集群分析 ( Hierarchical ) -----
+##################################################################
+
+#(1) 使用 hclust 函數
+
+# 使用 BostonHousing2 資料
+result = hclust(dist(B2)^2, method = "complete") 
+
+# 另外還有 "average" 與 "centroid" 兩種方法
+result
+plot(result)
+rect.hclust(result, k=2, border="red")
+
+#(2) Agglomerative Hierarchical Clustering (凝聚階層集群)：cluster 套件的 agnes ?函數
+
+# 使用 BostonHousing2 資料
+
+library(cluster)
+result = agnes(B2)
+summary(rsult)
+pltree(result)
+
+##################################################################
+# fpc 套件 pamk 決定最佳分群數目 -----
+##################################################################
+install.packages("fpc")
+library(fpc)
+
+# 試探 2 ~ 6 群
+pamk(B2,2:6) 
+
+iris2 = NumVars(iris)
+pamk(iris2,2:6) 
+
+##################################################################
+# 模糊集群分析 : Fuzzy Clustering -----
+##################################################################
+
+# BostonHousing data w/o categorical variables
+library(cluster)
+result = fanny(B2,5)
+result
+summary(result)
+plot(result)	
+
+# iris data w/o categorical variables
+result = fanny(iris2,3)
+result
+summary(result)
+plot(result)	
+
+##################################################################
+#  arules -----
+##################################################################
+
+library(arules)
+data("Adult")
+rules = apriori(Adult,parameter = list(supp = 0.5, conf = 0.9, target = "rules"))
+summary(rules)
+
+inspect(head(SORT(rules, by = "support"), n = 100))
+
+##################################################################
+#  arules: convert to transaction data -----
+##################################################################
+# -----------------------------------------
+# iris data and Association Analysis 
+# -----------------------------------------	
+library(arules)
+
+# iris data
+# 所有數值變數需先轉成分類變數 (factor 或 ordered factor)
+
+SepL = ordered(cut(iris$Sepal.Length,breaks = 4))
+SepW = ordered(cut(iris$Sepal.Width, breaks = 4))
+PetL = ordered(cut(iris$Petal.Length,breaks = 4))
+PetW = ordered(cut(iris$Petal.Width, breaks = 4))
+
+iris2=data.frame(SepL,SepW,PetL,PetW,Species=iris$Species)
+iris3 = as(iris2, "transactions")
+
+rules = apriori(iris3,parameter = list(supp = 0.2, conf = 0.6, target = "rules"))
+summary(rules)
+inspect(head(SORT(rules, by = "support"), n = 100))
+

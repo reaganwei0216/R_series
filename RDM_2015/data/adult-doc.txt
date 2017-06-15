@@ -1,0 +1,76 @@
+The AdultUCI data set contains a data frame with 48842 observations on the following 15 variables.
+
+1. age: a numeric vector.
+
+2. workclass: a factor with levels Federal-gov, Local-gov, Never-worked, Private, Self-emp-inc, Self-emp-not-inc, State-gov, and Without-pay.
+
+3. education: an ordered factor with levels Preschool < 1st-4th < 5th-6th < 7th-8th < 9th < 10th < 11th < 12th < HS-grad < Prof-school < Assoc-acdm < Assoc-voc < Some-college < Bachelors < Masters < Doctorate.
+
+4. education_num: a numeric vector.
+
+5. marital_status: a factor with levels Divorced, Married-AF-spouse, Married-civ-spouse, Married-spouse-absent, Never-married, Separated, and Widowed.
+
+6. occupation: a factor with levels Adm-clerical, Armed-Forces, Craft-repair, Exec-managerial, Farming-fishing, Handlers-cleaners, Machine-op-inspct, Other-service, Priv-house-serv, Prof-specialty, Protective-serv, Sales, Tech-support, and Transport-moving.
+
+7. relationship: a factor with levels Husband, Not-in-family, Other-relative, Own-child, Unmarried, and Wife.
+
+8. race: a factor with levels Amer-Indian-Eskimo, Asian-Pac-Islander, Black, Other, and White.
+
+9. sex: a factor with levels Female and Male.
+
+10. capital_gain: a numeric vector.
+
+11. capital_loss: a numeric vector.
+
+12. fnlwgt: a numeric vector.
+
+13. hours_per_week: a numeric vector.
+
+14. native_country: a factor with levels Cambodia, Canada, China, Columbia, Cuba, Dominican-Republic, Ecuador, El-Salvador, England, France, Germany, Greece, Guatemala, Haiti, Holand-Netherlands, Honduras, Hong, Hungary, India, Iran, Ireland, Italy, Jamaica, Japan, Laos, Mexico, Nicaragua, Outlying-US(Guam-USVI-etc), Peru, Philippines, Poland, Portugal, Puerto-Rico, Scotland, South, Taiwan, Thailand, Trinadad&Tobago, United-States, Vietnam, and Yugoslavia.
+
+15. income: an ordered factor with levels small < large ( if income > 50K/year => large)
+
+Details
+
+¸ê®Æ¨Ó·½:
+
+http://www.census.gov/ftp/pub/DES/www/welcome.html 
+(1994 by Ronny Kohavi and Barry Becker, Data Mining and Visualization, Silicon Graphics)
+http://www.ics.uci.edu/~mlearn/MLRepository.html
+
+age: cut into levels Young (0-25), Middle-aged (26-45), Senior (46-65) and Old (66+).
+
+hours-per-week: cut into levels Part-time (0-25), Full-time (25-40), Over-time (40-60) and Too-much (60+).
+
+capital-gain and capital-loss: each cut into levels None (0), Low (0 < median of the values greater zero < max) and High (>=max).
+
+R-Code Examples
+
+library(arules)
+data("AdultUCI")
+dim(AdultUCI)
+AdultUCI[1:2,]
+
+## remove attributes
+AdultUCI[["fnlwgt"]] <- NULL
+AdultUCI[["education-num"]] <- NULL
+
+## map metric attributes
+AdultUCI[[ "age"]] <- ordered(cut(AdultUCI[[ "age"]], c(15,25,45,65,100)),
+  labels = c("Young", "Middle-aged", "Senior", "Old"))
+
+AdultUCI[[ "hours-per-week"]] <- ordered(cut(AdultUCI[[ "hours-per-week"]],
+  c(0,25,40,60,168)),
+  labels = c("Part-time", "Full-time", "Over-time", "Workaholic"))
+
+AdultUCI[[ "capital-gain"]] <- ordered(cut(AdultUCI[[ "capital-gain"]],
+  c(-Inf,0,median(AdultUCI[[ "capital-gain"]][AdultUCI[[ "capital-gain"]]>0]),
+  Inf)), labels = c("None", "Low", "High"))
+
+AdultUCI[[ "capital-loss"]] <- ordered(cut(AdultUCI[[ "capital-loss"]],
+  c(-Inf,0, median(AdultUCI[[ "capital-loss"]][AdultUCI[[ "capital-loss"]]>0]),
+  Inf)), labels = c("None", "Low", "High"))
+
+## create transactions
+Adult <- as(AdultUCI, "transactions")
+Adult

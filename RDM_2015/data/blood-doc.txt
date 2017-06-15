@@ -1,0 +1,25 @@
+Title: Blood Transfusion Service Center Data Set
+
+Source:
+
+Original Owner and Donor
+Prof. I-Cheng Yeh
+Department of Information Management
+Chung-Hua University,
+Hsin Chu, Taiwan 30067, R.O.C.
+e-mail:icyeh 'at' chu.edu.tw
+TEL:886-3-5186511
+
+Date Donated: October 3, 2008 
+
+-----------------------------------------------------
+
+Variable 		Data_Type	Measurement 	Description 
+
+1. Recency		quantitative 	Months 		Input	months since last donation
+2. Frequency 		quantitative 	Times 		Input 	total number of donation
+3. Monetary 		quantitative 	c.c. blood 	Input 	total blood donated in c.c.
+4. Time 		quantitative 	Months 		Input 	months since first donation
+5. T200703		binary 		1=yes 0=no 	Output	whether he/she donated blood in March 2007
+
+
